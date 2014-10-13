@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <style type="text/css">
+      html { height: 100% }
+      body { height: 100%; margin: 0; padding: 0 }
+      #map_canvas { 
+        height: 300px;
+        width: 300px;
+      }
+    </style>
+    <!-- google map api 呼び出し 無償版はAPIキーなしで呼び出し可能 -->
+    <script type="text/javascript"
+      src="http://maps.googleapis.com/maps/api/js?sensor=false">
+    </script>
+    <script type="text/javascript">
+
+      var map;
+      var mapOptions = {
+        // 中心の座標を指定
+        center: new google.maps.LatLng(35.689779, 139.700381),
+        // ズーム。大きいほうが拡大。
+        zoom: 15,
+        // 航空写真にするかとかのタイプを指定
+        mapTypeId: google.maps.MapTypeId.ROADMAP,
+        // 縮尺の表示（デフォルトはOFF）
+        scaleControl: true
+      };
+
+      function initialize() {
+        map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
+
+
+        // マーカーの設定
+        var marker = new google.maps.Marker();
+        marker.setPosition(new google.maps.LatLng(35.693872, 139.701132));
+        marker.setTitle( 'コンビニ' ); // ツールチップ
+        marker.setMap(map);
+
+        var marker2 = new google.maps.Marker();
+        marker2.setPosition(new google.maps.LatLng(35.690921, 139.700258));
+        marker2.setTitle( '新宿駅' ); // ツールチップ
+        marker2.setMap(map);
+
+      }
+
+
+	// 住所検索
+	function getLatLng(place) {
+		var geocoder = new google.maps.Geocoder();
+		geocoder.geocode({
+			// 住所を検索
+			address: place,
+			region: 'jp'
+		}, function(results, status) {
+			// コールバック
+			if (status == google.maps.GeocoderStatus.OK) {
+				var bounds = new google.maps.LatLngBounds();
+				for (var r in results) {
+					if (results[r].geometry) {
+						var latlng = results[r].geometry.location;
+						// 中心座標を移動
+						map.setCenter(latlng);
+
+						//bounds.extend(latlng);
+						//var address = results[r].formatted_address.replace(/^日本, /, '');
+						//new google.maps.InfoWindow({
+						//	content: address + "<br>(Lat, Lng) = " + latlng.toString()
+						//}).open(map, new google.maps.Marker({
+						//	position: latlng,
+						//	map: map
+						//}));
+					}
+				}
+				//map.fitBounds(bounds);
+			} else if (status == google.maps.GeocoderStatus.ERROR) {
+				alert("サーバとの通信時に何らかのエラーが発生！");
+			} else if (status == google.maps.GeocoderStatus.INVALID_REQUEST) {
+				alert("リクエストに問題アリ！geocode()に渡すGeocoderRequestを確認せよ！！");
+			} else if (status == google.maps.GeocoderStatus.OVER_QUERY_LIMIT) {
+				alert("短時間にクエリを送りすぎ！落ち着いて！！");
+			} else if (status == google.maps.GeocoderStatus.REQUEST_DENIED) {
+				alert("このページではジオコーダの利用が許可されていない！・・・なぜ！？");
+			} else if (status == google.maps.GeocoderStatus.UNKNOWN_ERROR) {
+				alert("サーバ側でなんらかのトラブルが発生した模様。再挑戦されたし。");
+			} else if (status == google.maps.GeocoderStatus.ZERO_RESULTS) {
+				alert("見つかりません");
+			} else {
+				alert("えぇ～っと・・、バージョンアップ？");
+			}
+		});
+	}
+    </script>
+  </head>
+  <body onload="initialize()">
+
+    <form action="#" onsubmit="getLatLng(document.getElementById('address').value); return(false);">
+      <br>
+      住所を入力してください<br>
+      <br>
+      <input type='text' id='address' style='width: 400px' value=""> <br>
+      <input type='submit' value='検索'>
+    </form>
+    <br>
+
+    <div id="map_canvas" ></div>
+  </body>
+</html>
